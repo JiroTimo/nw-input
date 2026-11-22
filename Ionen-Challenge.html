@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ionen-Challenge</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Space+Grotesk:wght@500..700&display=swap">
+<style>
+  :root {
+    --bg: #FBF3F6; --ink: #2A1621; --muted: #6B5A63; --pink: #C42A6A; --pink-soft: #FCE4EE;
+    --blue: #2563A8; --blue-soft: #E3EEF9; --line: #EBC9D7; --card: #FFF9FB; --green: #1E7A4C; --green-soft: #E2F3EA;
+    --grey: #8A7A83;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: 'Inter', system-ui, sans-serif; }
+  .wrap { max-width: 480px; margin: 0 auto; padding: 20px 16px 32px; min-height: 100vh; display: flex; flex-direction: column; gap: 14px; }
+  h1, h2 { font-family: 'Space Grotesk', sans-serif; margin: 0; line-height: 1.15; }
+  h1 { font-size: 36px; }
+  h2 { font-size: 24px; }
+  p { margin: 0; font-size: 17px; line-height: 1.45; }
+  .kicker { font-size: 13px; letter-spacing: .12em; text-transform: uppercase; font-weight: 700; color: var(--pink); }
+  .muted { color: var(--muted); }
+  .top { display: flex; justify-content: space-between; align-items: center; font-size: 15px; font-weight: 600; }
+  .progress { height: 8px; background: var(--line); border-radius: 4px; overflow: hidden; }
+  .progress div { height: 100%; background: var(--pink); transition: width .4s; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 18px; padding: 14px 16px; }
+  .pse { display: flex; align-items: center; gap: 14px; }
+  .pse .tile { width: 84px; height: 84px; border: 3px solid var(--ink); border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #FFFDFE; flex: none; }
+  .pse .tile .oz { font-size: 13px; font-weight: 700; align-self: flex-start; margin-left: 8px; }
+  .pse .tile .sym { font-family: 'Space Grotesk', sans-serif; font-size: 30px; font-weight: 700; line-height: 1; }
+  .pse .tile .m { font-size: 12px; }
+  svg { width: 100%; max-width: 260px; display: block; margin: 0 auto; }
+  .counters { display: flex; flex-direction: column; gap: 8px; }
+  .ctr { display: grid; grid-template-columns: 1fr 52px 44px 52px; align-items: center; gap: 8px; background: var(--card); border: 2px solid var(--line); border-radius: 14px; padding: 6px 8px 6px 14px; }
+  .ctr .lbl { font-weight: 700; font-size: 17px; }
+  .ctr .val { text-align: center; font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 700; }
+  .ctr button { padding: 10px 0; font-size: 22px; }
+  .dot { display: inline-block; width: 12px; height: 12px; border-radius: 6px; margin-right: 8px; vertical-align: middle; }
+  button { font: inherit; font-weight: 700; font-size: 17px; border: none; border-radius: 12px; padding: 15px 10px; cursor: pointer; touch-action: manipulation; }
+  button:disabled { opacity: .4; cursor: default; }
+  .b-step { background: var(--pink-soft); color: var(--pink); }
+  .b-main { background: var(--ink); color: var(--bg); width: 100%; }
+  .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .opts.wide { grid-template-columns: 1fr; }
+  .b-opt { background: var(--card); color: var(--ink); border: 2px solid var(--line); font-size: 18px; text-align: center; }
+  .b-opt.sym { font-family: 'Space Grotesk', sans-serif; font-size: 22px; }
+  .b-opt.right { background: var(--green-soft); border-color: var(--green); color: var(--green); }
+  .b-opt.wrong { background: var(--pink-soft); border-color: var(--pink); color: var(--pink); }
+  .msg { border-radius: 14px; padding: 12px 14px; font-size: 16px; line-height: 1.4; }
+  .msg.ok { background: var(--green-soft); color: var(--green); }
+  .msg.no { background: var(--pink-soft); color: #8E1C4B; }
+  .hidden { display: none !important; }
+  .big { font-family: 'Space Grotesk', sans-serif; font-size: 64px; font-weight: 700; color: var(--pink); line-height: 1; }
+  ul { margin: 0; padding-left: 20px; } li { font-size: 16px; line-height: 1.45; margin-bottom: 6px; }
+  .pop { animation: pop .2s ease-out; transform-box: fill-box; transform-origin: center; }
+  @keyframes pop { from { transform: scale(0); } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div id="start" style="display:flex;flex-direction:column;gap:16px">
+    <p class="kicker">NW-Rückblick · Atomaufbau</p>
+    <h1>Ionen-Challenge</h1>
+    <div class="card" style="display:flex;flex-direction:column;gap:10px">
+      <p><b>8 Aufgaben</b> zu Atomen, Ionen, Isotopen und der Atommasse.</p>
+      <p>Bei manchen Aufgaben baust du ein Teilchen selbst: Du stellst Protonen, Neutronen und Elektronen ein. Bei anderen wählst du die richtige Antwort.</p>
+      <p class="muted">Löse alles selbstständig – wer hat am meisten Punkte?</p>
+    </div>
+    <button class="b-main" id="go">Los geht's</button>
+  </div>
+
+  <div id="game" class="hidden" style="display:flex;flex-direction:column;gap:14px">
+    <div class="top"><span id="lvl">Aufgabe 1 von 8</span><span id="pts">0 Punkte</span></div>
+    <div class="progress"><div id="bar" style="width:0%"></div></div>
+    <h2 id="title"></h2>
+
+    <div id="buildBox" style="display:flex;flex-direction:column;gap:12px">
+      <div class="card pse">
+        <div class="tile"><span class="oz" id="tOz"></span><span class="sym" id="tSym"></span><span class="m" id="tM"></span></div>
+        <p id="tInfo" style="font-size:15px"></p>
+      </div>
+      <svg id="atom" viewBox="0 0 280 280" aria-label="Das Teilchen, das du baust"></svg>
+      <div class="counters">
+        <div class="ctr"><span class="lbl"><span class="dot" style="background:#C42A6A"></span>Protonen</span><button class="b-step" data-k="p" data-d="-1">−</button><span class="val" id="vp">0</span><button class="b-step" data-k="p" data-d="1">+</button></div>
+        <div class="ctr"><span class="lbl"><span class="dot" style="background:#8A7A83"></span>Neutronen</span><button class="b-step" data-k="n" data-d="-1">−</button><span class="val" id="vn">0</span><button class="b-step" data-k="n" data-d="1">+</button></div>
+        <div class="ctr"><span class="lbl"><span class="dot" style="background:#2563A8"></span>Elektronen</span><button class="b-step" data-k="e" data-d="-1">−</button><span class="val" id="ve">0</span><button class="b-step" data-k="e" data-d="1">+</button></div>
+      </div>
+      <button class="b-main" id="check">Prüfen</button>
+    </div>
+
+    <div id="mcBox" class="hidden" style="display:flex;flex-direction:column;gap:10px">
+      <p id="mcQ"><b></b></p>
+      <div class="opts" id="opts"></div>
+    </div>
+
+    <div id="msg" class="msg hidden"></div>
+    <button class="b-main hidden" id="next">Weiter →</button>
+  </div>
+
+  <div id="end" class="hidden" style="display:flex;flex-direction:column;gap:16px">
+    <p class="kicker">Geschafft!</p>
+    <div class="big" id="final"></div>
+    <p id="time" class="muted"></p>
+    <div class="card">
+      <ul>
+        <li><b>Protonen</b> = Ordnungszahl. Sie bestimmen das Element und ändern sich nie.</li>
+        <li><b>Neutronen</b> = Massenzahl − Protonen.</li>
+        <li><b>Elektron abgeben</b> → <b style="color:var(--pink)">Kation (+)</b>, <b>Elektron aufnehmen</b> → <b style="color:var(--blue)">Anion (−)</b>. Ein Ion ist nie neutral.</li>
+        <li><b>Isotope</b>: gleiche Protonenzahl, andere Neutronenzahl.</li>
+        <li><b>Kommastelle</b>: Durchschnitt aller Isotope. Gerundet = Massenzahl.</li>
+      </ul>
+    </div>
+    <p>Zeig deine Punktzahl und warte auf die anderen.</p>
+  </div>
+
+</div>
+
+<script>
+const TASKS = [
+  { type: 'build', title: 'Baue ein Natrium-Atom.',
+    card: { sym: 'Na', z: 11, m: '22.99' }, info: 'Ein neutrales Atom – so wie es im PSE steht.',
+    goal: { p: 11, n: 12, e: 11 } },
+  { type: 'build', title: 'Natrium gibt 1 Elektron ab. Baue dieses Teilchen.',
+    card: { sym: 'Na', z: 11, m: '22.99' }, info: 'Was ändert sich – und was bleibt gleich?',
+    goal: { p: 11, n: 12, e: 10 },
+    follow: { q: 'Wie heisst dieses Teilchen?', sym: true, opts: ['Na⁺', 'Na⁻', 'Ne', 'Mg⁺'], a: 'Na⁺',
+      ex: '11 Protonen − 10 Elektronen = +1. Weniger Elektronen → positiv → Kation Na⁺. Es bleibt Natrium, weil sich die Protonen nicht ändern.' } },
+  { type: 'mc', title: 'Chlor nimmt 1 Elektron auf.', q: 'Was entsteht?', sym: true,
+    opts: ['Cl⁻', 'Cl⁺', 'Ar', 'Cl²⁻'], a: 'Cl⁻',
+    ex: 'Ein Elektron mehr → ein negatives Teilchen mehr → Cl⁻, ein Anion. Es bleibt Chlor (17 Protonen), es wird nicht zu Argon.' },
+  { type: 'build', title: 'Baue ein O²⁻-Ion.',
+    card: { sym: 'O', z: 8, m: '16.00' }, info: 'Die Ladung −2 sagt dir, wie viele Elektronen es mehr hat als Protonen.',
+    goal: { p: 8, n: 8, e: 10 },
+    follow: { q: 'Ist O²⁻ ein Kation oder ein Anion?', opts: ['Kation', 'Anion'], a: 'Anion',
+      ex: 'O²⁻ hat 2 Elektronen mehr als Protonen → negativ → Anion. Es hat 2 Elektronen aufgenommen.' } },
+  { type: 'mc', title: 'Teilchen-Detektiv', q: 'Ein Teilchen hat 12 Protonen, 12 Neutronen und 10 Elektronen. Was ist es?', sym: true,
+    opts: ['Mg²⁺', 'Mg²⁻', 'Ne', 'C'], a: 'Mg²⁺',
+    ex: '12 Protonen → Ordnungszahl 12 → Magnesium. 12 − 10 = +2 → Mg²⁺. Es hat 2 Elektronen abgegeben.' },
+  { type: 'build', title: 'Baue Deuterium (²H), ein Isotop von Wasserstoff.',
+    card: { sym: 'H', z: 1, m: '1.008' }, info: 'Die kleine 2 oben links ist die Massenzahl. Deuterium ist neutral.',
+    goal: { p: 1, n: 1, e: 1 } },
+  { type: 'mc', title: 'Isotope', q: 'Welche zwei Teilchen sind Isotope voneinander?', wide: true,
+    opts: ['¹²C und ¹⁴C', '¹⁴C und ¹⁴N', 'Na und Na⁺', 'O und O²⁻'], a: '¹²C und ¹⁴C',
+    ex: 'Isotope: gleiches Element (gleiche Protonenzahl), aber andere Neutronenzahl. ¹²C hat 6, ¹⁴C hat 8 Neutronen. Na und Na⁺ unterscheiden sich in den Elektronen – das sind Atom und Ion.' },
+  { type: 'mc', title: 'Die Kommastelle', q: 'Chlor hat im PSE die Atommasse 35.45 u. Woher kommt die Kommastelle?', wide: true,
+    opts: ['Es ist der Durchschnitt aller Chlor-Isotope.', 'Chlor hat ein halbes Neutron.', 'Die Elektronen wiegen 0.45 u.', 'Die Zahl ist ungenau gemessen.'],
+    a: 'Es ist der Durchschnitt aller Chlor-Isotope.',
+    ex: 'In der Natur gibt es ³⁵Cl und ³⁷Cl. Die 35.45 u ist ihr Durchschnitt. Gerundet ergibt das 35, die Massenzahl der häufigsten Chlor-Atome.' }
+];
+const MAXPTS = TASKS.reduce((s, t) => s + (t.type === 'build' ? 2 : 1) + (t.follow ? 1 : 0), 0);
+
+let i = 0, pts = 0, tries = 0, startTime = 0, cur = { p: 0, n: 0, e: 0 }, prev = { p: 0, n: 0, e: 0 };
+const $ = id => document.getElementById(id);
+const fmt = q => q === 0 ? '0' : (q > 0 ? '+' : '−') + Math.abs(q);
+
+function say(text, ok) { const m = $('msg'); m.textContent = text; m.className = 'msg ' + (ok ? 'ok' : 'no'); }
+function addPts(n) { pts += n; $('pts').textContent = pts + ' Punkte'; }
+function showNext() { $('next').textContent = i === TASKS.length - 1 ? 'Zum Ergebnis →' : 'Weiter →'; $('next').classList.remove('hidden'); }
+
+function draw() {
+  let s = `<circle cx="140" cy="140" r="118" fill="none" stroke="#EBC9D7" stroke-width="3" stroke-dasharray="6 6"/>`;
+  let pp = cur.p, nn = cur.n; const list = [];
+  while (pp > 0 || nn > 0) { if (pp > 0) { list.push('p'); pp--; } if (nn > 0) { list.push('n'); nn--; } }
+  list.forEach((t, k) => {
+    const r = 6.5 * Math.sqrt(k), a = k * 2.39996;
+    const x = 140 + r * Math.cos(a), y = 140 + r * Math.sin(a);
+    const isNew = (t === 'p' ? list.slice(0, k + 1).filter(z => z === 'p').length > prev.p : list.slice(0, k + 1).filter(z => z === 'n').length > prev.n);
+    s += `<circle class="${isNew ? 'pop' : ''}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="8" fill="${t === 'p' ? '#C42A6A' : '#8A7A83'}" stroke="#FBF3F6" stroke-width="1.5"/>`;
+  });
+  for (let k = 0; k < cur.e; k++) {
+    const a = (2 * Math.PI * k) / cur.e - Math.PI / 2;
+    const x = 140 + 118 * Math.cos(a), y = 140 + 118 * Math.sin(a);
+    s += `<circle class="${k >= prev.e ? 'pop' : ''}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="10" fill="#2563A8"/>`;
+    s += `<text x="${x.toFixed(1)}" y="${(y + 5).toFixed(1)}" text-anchor="middle" font-size="14" font-weight="700" fill="#F3F8FD" font-family="Inter, sans-serif">−</text>`;
+  }
+  $('atom').innerHTML = s;
+  prev = { ...cur };
+  ['p', 'n', 'e'].forEach(k => $('v' + k).textContent = cur[k]);
+  document.querySelectorAll('.b-step').forEach(b => {
+    const v = cur[b.dataset.k] + Number(b.dataset.d);
+    b.disabled = v < 0 || v > 20;
+  });
+}
+
+function mc(q, opts, a, ex, opt) {
+  $('mcQ').innerHTML = '<b></b>'; $('mcQ').firstChild.textContent = q;
+  const box = $('opts'); box.innerHTML = '';
+  box.className = 'opts' + (opt.wide ? ' wide' : '');
+  [...opts].sort(() => Math.random() - 0.5).forEach(o => {
+    const b = document.createElement('button');
+    b.className = 'b-opt' + (opt.sym ? ' sym' : ''); b.textContent = o;
+    b.onclick = () => {
+      [...box.children].forEach(x => x.disabled = true);
+      if (o === a) { b.classList.add('right'); addPts(1); say('Richtig! ' + ex, true); }
+      else { b.classList.add('wrong'); [...box.children].find(x => x.textContent === a).classList.add('right'); say('Leider nicht. ' + ex, false); }
+      showNext();
+    };
+    box.appendChild(b);
+  });
+  $('mcBox').classList.remove('hidden');
+}
+
+function load() {
+  const t = TASKS[i]; tries = 0;
+  $('lvl').textContent = `Aufgabe ${i + 1} von ${TASKS.length}`;
+  $('bar').style.width = (i / TASKS.length * 100) + '%';
+  $('title').textContent = t.title;
+  ['mcBox', 'msg', 'next', 'buildBox'].forEach(id => $(id).classList.add('hidden'));
+  if (t.type === 'build') {
+    cur = { p: 0, n: 0, e: 0 }; prev = { p: 0, n: 0, e: 0 };
+    $('tOz').textContent = t.card.z; $('tSym').textContent = t.card.sym; $('tM').textContent = t.card.m + ' u';
+    $('tInfo').textContent = t.info;
+    $('check').classList.remove('hidden');
+    document.querySelectorAll('.b-step').forEach(b => b.classList.remove('hidden'));
+    $('buildBox').classList.remove('hidden');
+    draw();
+  } else {
+    mc(t.q, t.opts, t.a, t.ex, t);
+  }
+  window.scrollTo(0, 0);
+}
+
+function check() {
+  const t = TASKS[i], g = t.goal; tries++;
+  if (cur.p === g.p && cur.n === g.n && cur.e === g.e) {
+    const got = tries === 1 ? 2 : 1; addPts(got);
+    say(`Richtig! Ladung = ${g.p} Protonen − ${g.e} Elektronen = ${fmt(g.p - g.e)}. +${got} Punkte`, true);
+    $('check').classList.add('hidden');
+    document.querySelectorAll('.b-step').forEach(b => b.disabled = true);
+    if (t.follow) mc(t.follow.q, t.follow.opts, t.follow.a, t.follow.ex, t.follow);
+    else showNext();
+    return;
+  }
+  const z = t.card.z, mass = Math.round(parseFloat(t.card.m));
+  if (cur.p !== g.p) say(`Protonen stimmen noch nicht: Protonen = Ordnungszahl (${z}).`, false);
+  else if (cur.n !== g.n) say(g.p + g.n === mass
+      ? `Neutronen stimmen noch nicht: Massenzahl (Atommasse gerundet = ${mass}) − Protonen.`
+      : `Neutronen stimmen noch nicht: Massenzahl (die kleine Zahl oben links) − Protonen.`, false);
+  else if (g.e === g.p) say('Elektronen stimmen noch nicht: Ein neutrales Atom hat gleich viele Elektronen wie Protonen.', false);
+  else say(g.e < g.p
+      ? `Elektronen stimmen noch nicht: Ladung ${fmt(g.p - g.e)} heisst ${g.p - g.e} Elektron${g.p - g.e > 1 ? 'en' : ''} weniger als Protonen.`
+      : `Elektronen stimmen noch nicht: Ladung ${fmt(g.p - g.e)} heisst ${g.e - g.p} Elektron${g.e - g.p > 1 ? 'en' : ''} mehr als Protonen.`, false);
+}
+
+document.querySelectorAll('.b-step').forEach(b => b.onclick = () => {
+  const k = b.dataset.k, v = cur[k] + Number(b.dataset.d);
+  if (v < 0 || v > 20) return;
+  cur[k] = v; $('msg').classList.add('hidden'); draw();
+});
+$('check').onclick = check;
+$('next').onclick = () => {
+  i++;
+  if (i < TASKS.length) { load(); return; }
+  $('game').classList.add('hidden'); $('end').classList.remove('hidden');
+  $('final').textContent = `${pts} / ${MAXPTS}`;
+  const sec = Math.round((Date.now() - startTime) / 1000);
+  $('time').textContent = `Zeit: ${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')} min`;
+  window.scrollTo(0, 0);
+};
+$('go').onclick = () => { $('start').classList.add('hidden'); $('game').classList.remove('hidden'); startTime = Date.now(); load(); };
+</script>
+</body>
+</html>
